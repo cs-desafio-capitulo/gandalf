@@ -1,0 +1,16 @@
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+
+// define o schema user
+var userSchema= mongoose.Schema(
+    {id:ObjectId, name:{type: String,required:true},
+    email:{type:String, unique: true,required:true},
+    password:{type:String,required:true}, 
+    permission:{type:String},
+    criate_date:{type:Date},
+    update_date:{type:Date,default: Date.now},
+    last_login:{type:Date,default: Date.now},
+    token:String
+});
+module.exports =  mongoose.model('Users',usuariosSchema);

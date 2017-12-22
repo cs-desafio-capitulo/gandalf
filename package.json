@@ -1,0 +1,53 @@
+{ "description": "About users",
+  "main": ".eslintrc.js",
+  "directories": {
+    "src":"src",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cs-desafio-capitulo/gandalf.git"
+  },
+  "keywords": [
+    "User", "signin","signup"
+  ],
+  "author": "Rosa Bugan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cs-desafio-capitulo/gandalf/issues"
+  },
+  "homepage": "https://github.com/cs-desafio-capitulo/gandalf#readme",
+  "name": "user",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "babel-node ./server.js",
+    "test": "npm run test:unit",
+    "test:integration": "NODE_ENV=test nyc mocha --require babel-register test/integration/**/*_spec.js -s 5000",
+    "test:unit": "NODE_ENV=test nyc mocha --require babel-register test/unit/**/*_spec.js -s 5000"
+  },
+  "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "body-parser": "^1.18.2",
+    "cookie-parser": "~1.4.3",
+    "crypto": "^1.0.1",
+    "debug": "~2.6.9",
+    "express": "^4.15.5",
+    "express-session": "^1.15.6",
+    "express-validator": "^4.3.0",
+    "mongodb": "^2.2.33",
+    "mongoose": "^4.13.0",
+    "request": "^2.74.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "nodemon": "^1.12.1",
+    "nyc": "^11.4.1",
+    "supertest": "^3.0.0"
+  }
+  
+}
