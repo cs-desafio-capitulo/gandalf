@@ -59,5 +59,25 @@ describe('Routes: Users', () => {
                         });
                     });
                });
-             });
+             });describe('POST /singin', () => {
+                context('when posting a pasword', () => {
+                  it('should return a token ', (done) => {
+                     const User = Object.create({}, {email:'user@user.com', password:'123', });
+                     const expectedUser = {
+                         email:'user@user.com',
+                         permission:'user',
+                         token:'1234567'
+                     };
+                 
+                       request
+                         .post('/user')
+                         .send(User)
+                         .end((err, res) => {
+                           expect(res.statusCode).to.eql(200);
+                            expect(res.body).to.eql(expectedUser);
+                            done(err);
+                         });
+                     });
+                });
+              });
 });

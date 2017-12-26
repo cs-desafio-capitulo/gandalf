@@ -59,7 +59,7 @@ describe('Controller: users', () => {
   });
 
   describe('getById()', () => {
-    it('should call send with one product', () => {
+    it('should call send with one user', () => {
       const fakeId = 'a-fake-id';
       const request = {
         params: {

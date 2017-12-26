@@ -1,7 +1,8 @@
-{ "description": "About users",
+{
+  "description": "About users",
   "main": ".eslintrc.js",
   "directories": {
-    "src":"src",
+    "src": "src",
     "test": "test"
   },
   "repository": {
@@ -9,7 +10,9 @@
     "url": "git+https://github.com/cs-desafio-capitulo/gandalf.git"
   },
   "keywords": [
-    "User", "signin","signup"
+    "User",
+    "signin",
+    "signup"
   ],
   "author": "Rosa Bugan",
   "license": "ISC",
@@ -30,11 +33,15 @@
     "babel-preset-es2015": "^6.24.1",
     "body-parser": "^1.18.2",
     "cookie-parser": "~1.4.3",
-    "crypto": "^1.0.1",
+    "crypto-js": "^3.1.9-1",
     "debug": "~2.6.9",
+    "eslint": "^4.14.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
     "express": "^4.15.5",
     "express-session": "^1.15.6",
     "express-validator": "^4.3.0",
+    "jsonwebtoken": "^8.1.0",
     "mongodb": "^2.2.33",
     "mongoose": "^4.13.0",
     "request": "^2.74.0"
@@ -49,5 +56,4 @@
     "nyc": "^11.4.1",
     "supertest": "^3.0.0"
   }
-  
 }
