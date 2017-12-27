@@ -1,5 +1,9 @@
-import app from './src/app';
+import setupApp from './src/app';
+
 const port = 3000;
-app.listen(port, () => {
-console.log(`app running on port ${port}`);
-});
+setupApp().then(app => app.listen(port, () => {
+  console.log(`app running on port ${port}`);
+}))
+  .catch((err) => {
+    console.log(err);
+  });

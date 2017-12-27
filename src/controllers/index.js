@@ -17,13 +17,12 @@ const UserController = UserModel => ({
   async signin(req, res) {
     try {
       const password = sha256(req.body.password);
-      const user = await User.find({ email: req.body.email, password });
-      const token = jwt.sign(user, 'codigo');
+      const user = await User.findOne({ email: req.body.email, password: password.toString() });
+      const token = jwt.sign(user.toJSON(), 'codigo');
       res.status(200).send(token);
     } catch (err) {
       res.status(400).send(err.message);
     }
-    res.sendStatus(200);
   },
 });
 
