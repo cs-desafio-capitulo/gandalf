@@ -11,4 +11,5 @@ const configureExpress = () => {
   return app;
 };
 
+
 export default () => database.connect().then(configureExpress);
