@@ -1,86 +1,65 @@
-import UsersController from '../../../src/controllers/users';
+import chai from 'chai';
 import sinon from 'sinon';
-import User from '../../../src/models/user';
+import UsersController from '../../../src/controllers/index';
 
-describe('Controller: users', () => {
-  const defaultUser = [{
-    __v: 0,
-    _id: "56cb91bdc3464f14678934ca",
+const expect = chai.expect;
+
+describe('controllers', () => {
+  const defaultUser = {
     name: 'Default user',
-    email:'user@user.com',
-    password:'', 
-    permission:'user',
-    criate_date:Date.now,
-    update_date: Date.now,
-    last_login:Date.now,
-    token:'1234567'
-  }];
-
-  const defaultRequest = {
-    params: {}
+    email: 'user@user.com',
+    password: '123',
+    permission: 'user',
   };
-
-  describe('signin()', () => {
-    it('should verify user and return a token', () => {
-      const response = {
-        send: sinon.spy()
-      };
-      User.find = sinon.stub();
-
-      User.find.withArgs({name,password}).resolves(defaultUser);
-
-      const usersController = new UsersController(User);
-
-      return usersController.get(defaultRequest, response)
-        .then(() => {
-          sinon.assert.calledWith(response.send, defaultUser);
-        });
+  const parameter = Object.assign({ email: 'user@user.com', password: '123' });
+describe('smoke tests', ()=>{
+  describe('create', () => {
+    it('should be a function', () => {
+      expect(UsersController.create).to.be.a('function');
     });
-
-    it('should return 400 when an error occurs', () => {
-      const request = {};
+  });
+  describe('signin', () => {
+    it('should be a function', () => {
+      expect(UsersController.signin).to.be.a('function');
+    });
+  });
+ });
+describe('Happy way',()=>{
+  describe('signin', () => {
+    const token = 'xcvsdhefiwefoiwjendjsvbsdvbjsdvçiosdivsov';
+    it.skip('should verify user and return a token', () => {
+      const request = parameter;
       const response = {
         send: sinon.spy(),
-        status: sinon.stub()
+        status: sinon.stub(),
       };
-
-      response.status.withArgs(400).returns(response);
-      User.find = sinon.stub();
-      User.find.withArgs({name,password}).rejects({ message: 'Error' });
-
-      const usersController = new UsersController(Product);
-
-      return usersController.get(request, response)
+  console.log(UsersController.signin(request));
+      response.status.withArgs(parameter).returns(response);
+      return UsersController.signin(request, response)
         .then(() => {
-          sinon.assert.calledWith(response.send, 'Error');
-        });
-    });
-
-  });
-
-  describe('getById()', () => {
-    it('should call send with one user', () => {
-      const fakeId = 'a-fake-id';
-      const request = {
-        params: {
-          id: fakeId
-        }
-      };
-      const response = {
-        send: sinon.spy()
-      };
-
-      Product.find = sinon.stub();
-      Product.find.withArgs({ _id: fakeId }).resolves(defaultProduct);
-
-      const productsController = new ProductsController(Product);
-
-      return productsController.getById(request, response)
-        .then(() => {
-          sinon.assert.calledWith(response.send, defaultProduct);
+          sinon.assert.calledWith(response.status, 200);
         });
     });
   });
-
 });
+describe('bad way',()=>{
+  it.skip('should return 400 when an error occurs', () => {
+    const request = {};
+    const response = {
+      send: sinon.spy(),
+      status: sinon.stub(),
+    };
 
+    response.status.withArgs(400).returns(response);
+    UsersController.signin = sinon.stub();
+    UsersController.signin.withArgs(parameter).rejects({ message: 'Error' });
+
+    const usersController = new UsersController(defaultUser);
+
+    return usersController.signin(request, response)
+      .then(() => {
+        sinon.assert.calledWith(response.send, 'Error');
+      });
+  });
+});
+})
