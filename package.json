@@ -26,7 +26,7 @@
   "scripts": {
     "start": "babel-node ./server.js",
     "babel-debug": "nodemon --exec babel-node server.js",
-    "test": "npm run test:unit",
+    "test": "npm run test:unit --require babel-register --watch",
     "test:integration": "NODE_ENV=test nyc mocha --require babel-register test/integration/**/*_spec.js -s 5000",
     "test:unit": "NODE_ENV=test nyc mocha --require babel-register test/unit/**/*_spec.js -s 5000"
   },
@@ -58,6 +58,7 @@
     "nodemon": "^1.14.3",
     "nyc": "^11.4.1",
     "sinon": "^4.1.3",
+    "sinon-stub-promise": "^4.0.0",
     "supertest": "^3.0.0"
   }
 }

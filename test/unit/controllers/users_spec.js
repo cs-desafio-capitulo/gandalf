@@ -1,65 +1,68 @@
-import chai from 'chai';
 import sinon from 'sinon';
+import { expect } from 'chai';
 import UsersController from '../../../src/controllers/index';
 
-const expect = chai.expect;
-
 describe('controllers', () => {
-  const defaultUser = {
+  const defaultUser = Object.assign({
     name: 'Default user',
     email: 'user@user.com',
     password: '123',
     permission: 'user',
-  };
+  });
   const parameter = Object.assign({ email: 'user@user.com', password: '123' });
-describe('smoke tests', ()=>{
-  describe('create', () => {
-    it('should be a function', () => {
-      expect(UsersController.create).to.be.a('function');
-    });
-  });
-  describe('signin', () => {
-    it('should be a function', () => {
-      expect(UsersController.signin).to.be.a('function');
-    });
-  });
- });
-describe('Happy way',()=>{
-  describe('signin', () => {
-    const token = 'xcvsdhefiwefoiwjendjsvbsdvbjsdvçiosdivsov';
-    it.skip('should verify user and return a token', () => {
-      const request = parameter;
-      const response = {
-        send: sinon.spy(),
-        status: sinon.stub(),
-      };
-  console.log(UsersController.signin(request));
-      response.status.withArgs(parameter).returns(response);
-      return UsersController.signin(request, response)
-        .then(() => {
-          sinon.assert.calledWith(response.status, 200);
-        });
-    });
-  });
-});
-describe('bad way',()=>{
-  it.skip('should return 400 when an error occurs', () => {
-    const request = {};
-    const response = {
-      send: sinon.spy(),
-      status: sinon.stub(),
-    };
-
-    response.status.withArgs(400).returns(response);
-    UsersController.signin = sinon.stub();
-    UsersController.signin.withArgs(parameter).rejects({ message: 'Error' });
-
-    const usersController = new UsersController(defaultUser);
-
-    return usersController.signin(request, response)
-      .then(() => {
-        sinon.assert.calledWith(response.send, 'Error');
+  const res = {
+    status:sinon.stub(),
+    send:sinon.spy(),
+  };
+ 
+  describe('smoke tests', () => {
+    describe('create', () => {
+      it('should be a function', () => {
+        expect(UsersController.create).to.be.a('function');
       });
+    });
+    describe('signin', () => {
+      it('should be a function', () => {
+        expect(UsersController.signin).to.be.a('function');
+      });
+    });
+  });
+  describe('Happy way', () => {
+    
+    describe('signin', () => {
+       it('should return a token when call signin function', () => {
+        
+      });
+    });
+    describe('singup', () => {
+      it('should call a create function', () => {
+    
+      });
+    });
+  });
+  describe('bad way', () => {
+   
+    describe('singin', () => {
+      it('should return 400 when an error occurs ', () => {
+        const status = 400;
+        sinon.stub(UsersController,'signin').withArgs().rejects({ message: 'Error' });
+        const result = UsersController.signin()
+        .then(() => {
+          expect(result.status).to.be.eql(status);
+        });
+       
+    });
+  });
+  describe('singup', () => {
+    it('should return 400 when an error occurs ', () => {
+      const status = 400;
+      sinon.stub(UsersController,'create').withArgs().rejects({ message: 'Error' });
+      const result = UsersController.create()
+        .then(() => {
+          expect(result.status).to.be.eql(status);
+        });
+      
+    });
+  });
   });
 });
-})
