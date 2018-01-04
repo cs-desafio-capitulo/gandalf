@@ -1,19 +1,15 @@
-var express = require('express');
+import express from 'express';
+import bodyParser from 'body-parser';
+import routes from './routes';
+import database from './config/database';
 
-var bodyParser = require('body-parser');
 const app = express();
-app.use(bodyParser.json());
-app.get('/users', (req, res) => res.send({text:"Hello World!"}));
-app.post('/user',(req,res)=>res.send(
-    {
-       name: 'Default user',
-       email:'user@user.com',
-       password:'123', 
-       permission:'user',
-       criate_date:1513958972398,
-       update_date:1513958972398,
-       last_login:1513958972398,
-       token:'1234567'
-    }
-));
-export default app;
+
+const configureExpress = () => {
+  app.use(bodyParser.json());
+  app.use('/', routes);
+  return app;
+};
+
+
+export default () => database.connect().then(configureExpress);

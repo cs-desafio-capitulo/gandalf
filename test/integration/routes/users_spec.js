@@ -55,6 +55,7 @@ describe('Routes: Users', () => {
                         .end((err, res) => {
                           expect(res.statusCode).to.eql(200);
                            expect(res.body).to.eql(expectedSavedUser);
+                           console.log(res.body);
                            done(err);
                         });
                     });

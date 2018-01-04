@@ -1,86 +1,166 @@
-import UsersController from '../../../src/controllers/users';
 import sinon from 'sinon';
-import User from '../../../src/models/user';
+import { expect } from 'chai';
+import { UserController } from '../../../src/controllers';
 
-describe('Controller: users', () => {
-  const defaultUser = [{
-    __v: 0,
-    _id: "56cb91bdc3464f14678934ca",
-    name: 'Default user',
-    email:'user@user.com',
-    password:'', 
-    permission:'user',
-    criate_date:Date.now,
-    update_date: Date.now,
-    last_login:Date.now,
-    token:'1234567'
-  }];
-
-  const defaultRequest = {
-    params: {}
-  };
-
-  describe('signin()', () => {
-    it('should verify user and return a token', () => {
-      const response = {
-        send: sinon.spy()
-      };
-      User.find = sinon.stub();
-
-      User.find.withArgs({name,password}).resolves(defaultUser);
-
-      const usersController = new UsersController(User);
-
-      return usersController.get(defaultRequest, response)
-        .then(() => {
-          sinon.assert.calledWith(response.send, defaultUser);
-        });
+describe('controllers', () => {
+  
+  describe('smoke tests', () => {
+    describe('factory function', () => {   
+      it('should return an object', () => {
+        expect(typeof UserController()).to.be.equal('object');
+      })
     });
+    describe('User controller object', () => {
+      const userController = UserController({})
 
-    it('should return 400 when an error occurs', () => {
-      const request = {};
-      const response = {
-        send: sinon.spy(),
-        status: sinon.stub()
-      };
+      it('should has "create" method', () => {
+        expect(typeof userController.create).to.be.equal('function');
+      })
 
-      response.status.withArgs(400).returns(response);
-      User.find = sinon.stub();
-      User.find.withArgs({name,password}).rejects({ message: 'Error' });
-
-      const usersController = new UsersController(Product);
-
-      return usersController.get(request, response)
-        .then(() => {
-          sinon.assert.calledWith(response.send, 'Error');
-        });
-    });
-
+      it('should has "signin" method', () => {
+        expect(typeof userController.signin).to.be.equal('function');
+    })
   });
-
-  describe('getById()', () => {
-    it('should call send with one user', () => {
-      const fakeId = 'a-fake-id';
-      const request = {
-        params: {
-          id: fakeId
+  });
+ 
+  describe('Happy way', () => {
+    let instances = 0;
+    let salva = 0;
+    let busca = 0; 
+    const fakeDatabase={async findOne(req,res){
+      const user = new mockUserModel();
+      mockRes.status.code=200;
+        busca += 1;
+        user.token = 'token';
+        return user ;
+      }
+    }
+    class mockUserModel{
+      constructor() {
+        instances += 1;
+        this.email ='123@eu.com';
+        this.password = 'pass';
+        this.token = '';
+      };   
+      
+     async save() {
+      mockRes.status.code=200;
+      salva += 1;
+       return;
+         };
+     
+      toJSON(value){ return value};
+      }
+      const mockSHA = (value) => `${value}`; 
+      const mockJwk = {sign:(value, cod) => `${value}`};
+      let resposta = '';
+      const mockReq = { body: {email: '123@eu.com', password: 'pass'} };
+      const mockRes = {
+        status: (code) => {
+         // TODO: create new test "should call res.status and res.send"
+          //expect(code).to.be.equal(200);
+          return { 
+            
+            send: (value) => {
+              resposta = value ;
+             return value;
+             //;
+            }
+          }
         }
-      };
-      const response = {
-        send: sinon.spy()
-      };
-
-      Product.find = sinon.stub();
-      Product.find.withArgs({ _id: fakeId }).resolves(defaultProduct);
-
-      const productsController = new ProductsController(Product);
-
-      return productsController.getById(request, response)
-        .then(() => {
-          sinon.assert.calledWith(response.send, defaultProduct);
-        });
+      }
+  
+    describe('signin', () => {
+      const userController = UserController(fakeDatabase, mockSHA, mockJwk);
+      it('should call findOne funtion',async () => {
+       busca=0;
+        await userController.signin(mockReq, mockRes);
+        expect(busca).to.be.equal(1);
+      });
+      it('should res send token',async() => {
+        await userController.signin(mockReq, mockRes);
+        expect(resposta).to.be.a('string');
+      })
     });
-  });
-
+    describe('singup', () => {    
+      const userController = UserController(mockUserModel, mockSHA, mockJwk);
+      it('should call UserModel', async () => { 
+        instances=0;
+      await userController.create(mockReq, mockRes);
+        expect(instances).to.be.equal(1);
+      });
+      it('should res send instance of mockUserModel',async() => {
+        await userController.create(mockReq, mockRes);
+        console.log({'mockRes': resposta });
+        expect(resposta instanceof mockUserModel).to.be.equal(true)
+      })
+      it('should call save funtion',async()=> {
+        salva=0;
+        await userController.create(mockReq,mockRes);
+        expect(salva).to.be.equal(1);
+      })
+    });
+   
 });
-
+  describe('bad way', () => { 
+    const fakeDatabase={async findOne(req,res){
+      const user = new mockUserModel();
+      throw new Error('Booom!!');
+      
+      }
+    }
+    class mockUserModel {
+      constructor() {
+        this.password = 'pass';
+      }
+    async save() {
+        throw new Error('Booom!!');
+      };
+      async findOne(){
+        throw new Error('Booom!!');
+      };
+      toJSON(value){ return value};
+    }
+    const mockSHA = (value) => `${value}`;
+    const mockJwk = {sing:(value) => `${value}`};
+    const mockReq = { body: {} }
+    let callCountStatus = 0;
+    let callCountSend = 0;
+    let busca=0;
+    const mockRes = {
+      status: (code) => {
+        callCountStatus++
+        expect(code).to.be.equal(400);
+        return {
+          send: (value) => {
+            callCountSend++
+            expect(value).to.be.equal('Booom!!');
+          }
+        }
+      }
+    }
+    describe('singin', () => {
+      const userController = UserController(fakeDatabase, mockSHA, mockJwk);
+      it('should count status equal 1 and count send equal 1 ', async() => {
+        callCountStatus=0;
+        callCountSend=0;
+        await userController.signin(mockReq,mockRes);
+        expect(callCountStatus).to.be.equal(1);
+        expect(callCountSend).to.be.equal(1);
+       });
+  });
+  describe('singup', () => {
+    const userController = UserController(mockUserModel, mockSHA,mockJwk);
+    it('should return 400 when an error occurs ', async() => {
+      callCountStatus=0;
+      callCountSend=0;
+      console.log({'status': callCountStatus,'send': callCountSend});
+      await userController.create(mockReq,mockRes);
+      expect(callCountStatus).to.be.equal(1);
+      expect(callCountSend).to.be.equal(1);
+      
+    });
+ 
+  });
+  });
+});
