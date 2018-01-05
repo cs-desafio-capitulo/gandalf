@@ -25,9 +25,11 @@
   "scripts": {
     "start": "babel-node ./server.js",
     "babel-debug": "nodemon --exec babel-node server.js",
-    "test": "npm run test:unit --require babel-register ",
+    "test": "npm run test:unit && test:integration --require babel-register ",
     "test:integration": "NODE_ENV=test nyc mocha --require babel-register test/integration/**/*_spec.js -s 5000",
-    "test:unit": "NODE_ENV=test nyc mocha --require babel-register test/unit/**/*_spec.js -s 5000"
+    "test:unit": "NODE_ENV=test nyc mocha --require babel-register test/unit/**/*_spec.js -s 5000",
+    "eslint:fix": "node_modules/.bin/eslint . --fix",
+    "eslint": "node_modules/.bin/eslint ."
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -49,7 +51,8 @@
     "jsonwebtoken": "^8.1.0",
     "mongodb": "^2.2.33",
     "mongoose": "^4.13.0",
-    "request": "^2.74.0"
+    "request": "^2.74.0",
+    "sha256": "^0.2.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
