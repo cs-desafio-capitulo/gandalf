@@ -27,11 +27,12 @@ describe('controllers', () => {
     let instances = 0;
     let salva = 0;
     let busca = 0; 
-    const fakeDatabase={async findOne(req,res){
+    const fakeDatabase={
+      async findOne(req,res){
       const user = new mockUserModel();
       mockRes.status.code=200;
-        busca += 1;
-        user.token = 'token';
+       busca += 1;
+       user.token = 'token';
         return user ;
       }
     }
