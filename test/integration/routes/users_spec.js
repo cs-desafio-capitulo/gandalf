@@ -1,25 +1,27 @@
 import supertest from 'supertest';
-import { expect } from 'chai';
 import mongoose from 'mongoose';
-
+import sha256 from 'crypto-js/sha256';
+import { expect } from 'chai';
 import Myapp from '../../../src/app';
+import UserModel from '../../../src/models';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 
-describe('Routes: Users', () => {
+
+describe('userRoutes: Users', () => {
   let request;
   before(async () => {
-    const app = await Myapp();
+    const app = await Myapp(); 
+    await UserModel.remove({});
     request = supertest(app);
   });
-
-
   after(() => {
     mongoose.connection.close();
   });
 
   const defaultUser = {
-    name: 'Default user',
-    email: 'user@user.com',
-    password: '123',
+    name: 'Default',
+    email: 'user1@user.com',
+    password: 'pass',
     permission: 'user',
     criate_date: 1513958972398,
     update_date: 1513958972398,
@@ -30,13 +32,13 @@ describe('Routes: Users', () => {
   const newUser = Object.assign({}, { _id: customId }, defaultUser);
   const expectedSavedUser = {
     _id: customId,
-    name: 'Default user',
-    email: 'user@user.com',
-    password: '123',
+    name: 'Default',
+    email: 'user1@user.com',
+    password: sha256('pass'),
     permission: 'user',
     criate_date: '2017-12-22T16:09:32.398Z',
     update_date: '2017-12-22T16:09:32.398Z',
-    last_login: 1513958972398,
+    last_login: '2017-12-22T16:09:32.398Z',
     token: '',
   };
   describe('POST /signup', () => {
@@ -44,10 +46,10 @@ describe('Routes: Users', () => {
       it('should return a new user with status code 200', (done) => {
         request
           .post('/signup')
-          .send(defaultUser)
-          .end(() => {
-            expect(200, expectedSavedUser, done);
-          });
+          .send(newUser)
+          .expect(200)
+          .end((err, res) =>{  
+            done();});
       });
     });
   });
@@ -55,7 +57,7 @@ describe('Routes: Users', () => {
   describe('POST /singin', () => {
     context('when posting a pasword', () => {
       it('should return a token ', (done) => {
-        const User = Object.assign({}, { email: 'Newuser@user.com', password: 'pass' });
+        const User = Object.assign({}, { email: 'user1@user.com', password: 'pass' });
         const expectedUser = {
           email: 'user@user.com',
           permission: 'user',
@@ -65,11 +67,26 @@ describe('Routes: Users', () => {
         request
           .post('/signin')
           .send(User)
-          .end((err, res) => {
-            expect(res.statusCode).to.eql(200);
-            expect(res.body).to.eql(expectedUser);
+          .expect(200)
+          .end((err,res)=>{
+
+            expect(res.text).to.have.lengthOf(509);
+            done();
+        })
+      });
+    });
+  });
+  describe('POST /singin', () => {
+    context('when posting a error pasword', () => {
+      it('should return a error ', (done) => {
+        const User = Object.assign({}, { email: 'Newuser@user.com', password: '123' });
+        request
+          .post('/signin')
+          .send(User)
+          .expect(400)
+          .end((err,res)=>{
             done(err);
-          });
+            })
       });
     });
   });

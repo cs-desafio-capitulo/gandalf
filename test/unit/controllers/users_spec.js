@@ -25,13 +25,12 @@ describe('controllers', () => {
     let instances = 0;
     let salva = 0;
     let busca = 0;
+   
     const fakeDatabase = {
       async findOne(req, res) {
-        const user = new mockUserModel();
         mockRes.status.code = 200;
         busca += 1;
-        user.token = 'token';
-        return user;
+        mockRes.status.value='token';
       },
     };
     class mockUserModel {
@@ -41,7 +40,7 @@ describe('controllers', () => {
         this.password = 'pass';
         this.token = '';
       }
-
+      
       async save() {
         mockRes.status.code = 200;
         salva += 1;
@@ -50,7 +49,7 @@ describe('controllers', () => {
       toJSON(value) { return value; }
     }
     const mockSHA = value => `${value}`;
-    const mockJwk = { sign: (value, cod) => `${value}` };
+    const mockJwk = { sign: (value) => `${value}` };
     let resposta = '';
     const mockReq = { body: { email: '123@eu.com', password: 'pass' } };
     const mockRes = {
@@ -70,13 +69,15 @@ describe('controllers', () => {
 
     describe('signin', () => {
       const userController = UserController(fakeDatabase, mockSHA, mockJwk);
-      it('should call findOne funtion', async () => {
+      it('should call findOne funtion',async () => {
         busca = 0;
         await userController.signin(mockReq, mockRes);
         expect(busca).to.be.equal(1);
       });
       it('should res send token', async () => {
         await userController.signin(mockReq, mockRes);
+        const res = mockRes.status.value;
+        console.log({res});
         expect(resposta).to.be.a('string');
       });
     });
@@ -89,7 +90,6 @@ describe('controllers', () => {
       });
       it('should res send instance of mockUserModel', async () => {
         await userController.create(mockReq, mockRes);
-        console.log({ mockRes: resposta });
         expect(resposta instanceof mockUserModel).to.be.equal(true);
       });
       it('should call save funtion', async () => {
@@ -126,11 +126,11 @@ describe('controllers', () => {
     const busca = 0;
     const mockRes = {
       status: (code) => {
-        callCountStatus+=1;
+        callCountStatus += 1;
         expect(code).to.be.equal(400);
         return {
           send: (value) => {
-            callCountSend+=1;
+            callCountSend += 1;
             expect(value).to.be.equal('Booom!!');
           },
         };
@@ -142,6 +142,7 @@ describe('controllers', () => {
         callCountStatus = 0;
         callCountSend = 0;
         await userController.signin(mockReq, mockRes);
+        console.log({callCountStatus,callCountSend});
         expect(callCountStatus).to.be.equal(1);
         expect(callCountSend).to.be.equal(1);
       });
@@ -151,7 +152,6 @@ describe('controllers', () => {
       it('should return 400 when an error occurs ', async () => {
         callCountStatus = 0;
         callCountSend = 0;
-        console.log({ status: callCountStatus, send: callCountSend });
         await userController.create(mockReq, mockRes);
         expect(callCountStatus).to.be.equal(1);
         expect(callCountSend).to.be.equal(1);
