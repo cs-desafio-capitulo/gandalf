@@ -4,7 +4,6 @@ import sha256 from 'crypto-js/sha256';
 import { expect } from 'chai';
 import Myapp from '../../../src/app';
 import UserModel from '../../../src/models';
-import { CLIENT_RENEG_LIMIT } from 'tls';
 
 
 describe('userRoutes: Users', () => {
@@ -48,10 +47,26 @@ describe('userRoutes: Users', () => {
           .post('/signup')
           .send(newUser)
           .expect(200)
-          .end((err, res) =>{  
-            done();});
+          .end((err, res) =>{ 
+            expect(res.text).to.be.a('string');
+            if(err) done(err); 
+            done();
+          });
       });
     });
+    context('when posting a null user',() =>{
+      it.skip('should return a error with status 400', (done) => {
+        request
+          .post('/sigup')
+          .send({})
+          .expect(400)
+          .end((err, res ) => {
+            expect(err.message).to.be.a('string');
+            if(err) done(err);
+
+          });
+        })
+    })
   });
 
   describe('POST /singin', () => {

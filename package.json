@@ -28,6 +28,7 @@
     "test": "npm run test:unit && npm run test:integration --watch --require babel-register ",
     "test:integration": "NODE_ENV=test nyc mocha --require babel-register test/integration/**/*_spec.js -s 5000",
     "test:unit": "NODE_ENV=test nyc mocha --require babel-register test/unit/**/*_spec.js -s 5000",
+    "test:jest": "jest",
     "eslint:fix": "node_modules/.bin/eslint . --fix",
     "eslint": "node_modules/.bin/eslint ."
   },
@@ -55,12 +56,15 @@
     "request": "^2.74.0"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-jest": "^22.0.4",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "jest": "^22.0.4",
     "mocha": "^4.0.1",
     "nodemon": "^1.14.3",
     "nyc": "^11.4.1",
+    "regenerator-runtime": "^0.11.1",
     "sinon": "^4.1.3",
     "sinon-stub-promise": "^4.0.0",
     "supertest": "^3.0.0"

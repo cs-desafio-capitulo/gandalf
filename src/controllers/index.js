@@ -7,7 +7,6 @@ export const UserController = (UserModel, hash, tokconstrutor) => ({
   async create(req, res) {
     const user = new UserModel(req.body);
     user.password = hash(user.password);
-
     try {
       await user.save();
       res.status(200).send(user);
@@ -19,8 +18,10 @@ export const UserController = (UserModel, hash, tokconstrutor) => ({
   async signin(req, res) {
     let pass = req.body.password;
     pass = hash(pass).toString();
+    console.log({pass});
     try {
       const user = await UserModel.findOne({ email: req.body.email, password: pass });
+      console.log({user});
       const token = tokconstrutor.sign(user.toJSON(), 'codigo');
       res.status(200).send(token);
     } catch (err) {
