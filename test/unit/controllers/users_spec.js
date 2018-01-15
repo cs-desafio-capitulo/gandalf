@@ -18,6 +18,10 @@ describe('controllers', () => {
       it('should has "signin" method', () => {
         expect(typeof userController.signin).to.be.equal('function');
       });
+
+      it('should has "validate" method', () => {
+        expect(typeof userController.validate).to.be.equal('function');
+      });
     });
   });
 
@@ -25,12 +29,16 @@ describe('controllers', () => {
     let instances = 0;
     let salva = 0;
     let busca = 0;
-   
+
     const fakeDatabase = {
+      constructor(){
+        this.Id='fakeId';
+      },
       async findOne(req, res) {
         mockRes.status.code = 200;
+        
         busca += 1;
-        mockRes.status.value='token';
+        mockRes.status.value = 'token';
       },
     };
     class mockUserModel {
@@ -40,7 +48,7 @@ describe('controllers', () => {
         this.password = 'pass';
         this.token = '';
       }
-      
+
       async save() {
         mockRes.status.code = 200;
         salva += 1;
@@ -49,7 +57,7 @@ describe('controllers', () => {
       toJSON(value) { return value; }
     }
     const mockSHA = value => `${value}`;
-    const mockJwk = { sign: (value) => `${value}` };
+    const mockJwk = { sign: value => `${value}` };
     let resposta = '';
     const mockReq = { body: { email: '123@eu.com', password: 'pass' } };
     const mockRes = {
@@ -69,7 +77,7 @@ describe('controllers', () => {
 
     describe('signin', () => {
       const userController = UserController(fakeDatabase, mockSHA, mockJwk);
-      it('should call findOne funtion',async () => {
+      it('should call findOne funtion', async () => {
         busca = 0;
         await userController.signin(mockReq, mockRes);
         expect(busca).to.be.equal(1);
@@ -77,10 +85,12 @@ describe('controllers', () => {
       it('should res send token', async () => {
         await userController.signin(mockReq, mockRes);
         const res = mockRes.status.value;
-        console.log({res});
+        console.log({ res });
         expect(resposta).to.be.a('string');
       });
+      
     });
+
     describe('singup', () => {
       const userController = UserController(mockUserModel, mockSHA, mockJwk);
       it('should call UserModel', async () => {
@@ -98,6 +108,19 @@ describe('controllers', () => {
         expect(salva).to.be.equal(1);
       });
     });
+
+    describe('validate',() => {
+      const userController = UserController(fakeDatabase, mockSHA, mockJwk);
+      const mockReq1 = {body:{token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1NmNiOTFiZGMzNDY0ZjE0Njc4OTM0Y2EiLCJuYW1lIjoiRGVmYXVsdCIsImVtYWlsIjoidXNlcjFAdXNlci5jb20iLCJwYXNzd29yZCI6ImQ3NGZmMGVlOGRhM2I5ODA2YjE4Yzg3N2RiZjI5YmJkZTUwYjViZDhlNGRhZDdhM2E3MjUwMDBmZWI4MmU4ZjEiLCJjcmlhdGVfZGF0ZSI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsIl9fdiI6MCwibGFzdF9sb2dpbiI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsInVwZGF0ZV9kYXRlIjoiMjAxNy0xMi0yMlQxNjowOTozMi4zOThaIiwicGVybWlzc2lvbiI6InVzZXIiLCJpYXQiOjE1MTYwNDkzNjJ9.dz7kZoPdk1cQJ809Mj8-twdrI1dU_CoKbCVXPH3KUOk'}};
+      it('should return a user Id', async () => {
+        const myUser = await userController.validate(mockReq1, mockRes);
+        expect(myUser.Id).to.be.equal('fakeid');
+      });
+     
+      it('should return a date Expiration Token', () =>{
+        
+      })
+    })
   });
   describe('bad way', () => {
     const fakeDatabase = {
@@ -123,7 +146,6 @@ describe('controllers', () => {
     const mockReq = { body: {} };
     let callCountStatus = 0;
     let callCountSend = 0;
-    const busca = 0;
     const mockRes = {
       status: (code) => {
         callCountStatus += 1;
@@ -142,7 +164,7 @@ describe('controllers', () => {
         callCountStatus = 0;
         callCountSend = 0;
         await userController.signin(mockReq, mockRes);
-        console.log({callCountStatus,callCountSend});
+        console.log({ callCountStatus, callCountSend });
         expect(callCountStatus).to.be.equal(1);
         expect(callCountSend).to.be.equal(1);
       });

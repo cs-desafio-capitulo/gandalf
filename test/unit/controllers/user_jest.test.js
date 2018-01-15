@@ -3,13 +3,8 @@ import { UserController } from '../../../src/controllers';
 // dados mochados
 
 let salva = 0;
-let tojson = 0;
-const mockModelo = {
-  async findOne(req, res) {
-    const user = new mockUserModel();
-    throw new Error('Booom!!');
-  },
-};
+const busca = 0;
+
 class mockModel {
   constructor() {
     this.email = '123@eu.com';
@@ -17,31 +12,36 @@ class mockModel {
     this.token = '';
   }
 
-async save(){
-  salva += 1;
+  async save() {
+    salva += 1;
+    mockRes.status.code = 200;
+    return true;
+  }
 }
+const toJSON = jest.fn();
+toJSON.mockReturnValue(1);
+const save = jest.fn();
+save.mockReturnValue(true);
+const findOne = jest.fn();
+findOne
+  .mockReturnValue({ status: 200 });
 
-toJSON(value) { 
-  tojson += 1;
-  return `${value}`; 
-}
-};
-function mockJwk(value){sing:(value)=>`${value}`;}
-function mockSha(value) {return value;};
+function mockJwk(value) { value => `${value}`; }
+function mockSha(value) { return value; }
 const user = UserController(mockModel, mockSha, mockJwk);
-const user1 = UserController(mockModelo, mockSha, mockJwk);
-const reqRes={
-  status:code =>({ 
-    send: value =>{ return value;}
-  })
+
+const mockRes = {
+  status: code => ({
+    send: value => value,
+  }),
 };
- 
-test('Create call save function', async()=>{
-  await user.create({ body: { } }, reqRes);
-  expect(salva).toBe(1);
+
+test('Create call save function', async () => {
+  await user.create({ body: { } }, mockRes);
+  expect(mockRes.status.code).toBe(200);
 });
 
-test('Signin call toJson function', async()=>{
-  await user1.signin( { body:{ password:'123'}},reqRes);
-  expect(tojson).toBe(1);
-})
+test('Signin call toJson function', async () => {
+  await user.signin({ body: { password: 'pass' } }, mockRes);
+  expect(mockRes.status.code).toBe(200);
+});
