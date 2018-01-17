@@ -61,12 +61,11 @@ describe('userRoutes: Users', () => {
     context('when posting a password', () => {
       it('should return a token ', (done) => {
         const User = Object.assign({}, { email: 'user1@user.com', password: 'pass' });
-        const token = jwt.sign(expectedSavedUser, 'codigo');
         request
           .post('/signin')
           .send(User)
           .expect((res) => {
-            if (res.length > 30) return true;
+            if (res.length > 50) return true;
           })
           .expect(200, done);
       });
@@ -74,19 +73,19 @@ describe('userRoutes: Users', () => {
   });
 
   describe('POST /singin', () => {
-    context('when posting a error password', () => {
+    context('when posting without password', () => {
       it('should return a error ', (done) => {
-        const User = Object.assign({}, { email: 'Newuser@user.com', password: '123' });
+        const User = Object.assign({}, { email: 'Newuser@user.com' });
         request
           .post('/signin')
           .send(User)
-          .expect(400, done);
+          .expect(400,'dados de entrada incorretos', done);
       });
     });
   });
 
   context('when create a null user', () => {
-    it('should return a error with status 400', async() => {
+    it('should return a error with status 400', async () => {
       const mockres =  {
         status: code =>
           ({

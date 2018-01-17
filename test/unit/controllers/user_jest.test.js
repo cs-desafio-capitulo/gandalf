@@ -36,12 +36,12 @@ const mockRes = {
   }),
 };
 
-test('Create call save function', async () => {
-  await user.create({ body: { } }, mockRes);
+test('Create return status 200', async () => {
+  await user.create({ body: {name:'123', password:'123',email:'123' } }, mockRes);
   expect(mockRes.status.code).toBe(200);
 });
 
-test('Signin call toJson function', async () => {
-  await user.signin({ body: { password: 'pass' } }, mockRes);
+test('Signin return status 200', async () => {
+  await user.signin({ body: { password: 'pass', email:'123' } }, mockRes);
   expect(mockRes.status.code).toBe(200);
 });
