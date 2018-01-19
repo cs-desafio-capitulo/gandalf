@@ -15,9 +15,10 @@ function errorHandler(err, req, res, next) {
 }
 
 const configureExpress = () => {
-  app.use(errorHandler);
+
   app.use(cors());
   app.use(bodyParser.json());
+  app.use(errorHandler);
   app.use('/', logger, routes);
 
   return app;

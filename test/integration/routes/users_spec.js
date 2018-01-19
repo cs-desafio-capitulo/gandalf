@@ -1,12 +1,9 @@
 import supertest from 'supertest';
 import mongoose from 'mongoose';
 import sha256 from 'crypto-js/sha256';
-import jwt from 'jsonwebtoken';
 import { expect } from 'chai';
 import Myapp from '../../../src/app';
 import UserModel from '../../../src/models';
-import Controller from '../../../src/controllers';
-
 
 describe('userRoutes: Users', () => {
   let request;
@@ -47,67 +44,68 @@ describe('userRoutes: Users', () => {
   };
 
   describe('POST /signup', () => {
-    context('when posting a user', () => {
-      it('should return a new user with status code 200', (done) => {
-        request
+    context('when posting a validuser', () => {
+      it('should return a new  user with status code 200', async () => {
+        await request
           .post('/signup')
           .send(newUser)
-          .expect(200, expectedSavedUser, done);
+          .expect(200, expectedSavedUser);
       });
     });
   });
 
   describe('POST /singin', () => {
-    context('when posting a password', () => {
-      it('should return a token ', (done) => {
+    context('when posting a valid password and email', () => {
+      it('should return a token ', async () => {
         const User = Object.assign({}, { email: 'user1@user.com', password: 'pass' });
-        request
+        await request
           .post('/signin')
           .send(User)
           .expect((res) => {
             if (res.length > 50) return true;
           })
-          .expect(200, done);
+          .expect(200);
       });
     });
   });
 
   describe('POST /singin', () => {
     context('when posting without password', () => {
-      it('should return a error ', (done) => {
-        const User = Object.assign({}, { email: 'Newuser@user.com' });
-        request
+      it('should return a error ', async () => {
+        const User = { email: 'Newuser@user.com' };
+
+        const resUser = await request
           .post('/signin')
           .send(User)
-          .expect(400,'dados de entrada incorretos', done);
+          .expect(400, 'password: Path `password` is required. ');
+
       });
     });
   });
 
-  context('when create a null user', () => {
+  context('signin when posting a null user', () => {
     it('should return a error with status 400', async () => {
-      const mockres =  {
-        status: code =>
-          ({
-  
-            send: (value) => {
-              return value;
-              // ;
-            },
-          }),
-  
-      };
-      await Controller.create({}, mockres);
-      expect(mockres.code).to.be.equal(400);
+      const User = '';
+
+      const resUser = await request
+        .post('/signin')
+        .send(User);
+      expect(resUser.error.text).to.be.equal('password: Path `password` is required. email: Path `email` is required.');
+      expect(resUser.statusCode).to.be.equal(400);
+
+
     });
   });
-  context('when posting a null user', () => {
-    it('should return a error with status 400', (done) => {
+
+  context('signup when posting a null user', () => {
+    it('should return a error with status 400', async () => {
       const User = '';
-      request
+      const resUser = await request
         .post('/signup')
-        .send(User)
-        .expect(400, done);
+        .send(User);
+      expect(resUser.error.text).to.be.equal('User validation failed: name: Path `name` is required.');
+      expect(resUser.statusCode).to.be.equal(400);
+
     });
   });
 });

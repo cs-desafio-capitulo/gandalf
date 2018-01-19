@@ -7,55 +7,48 @@ export const calcExpDate = (exp) => {
   expirationDate.setTime(expirationDate.getTime() + exp);
   return expirationDate;
 };
-
-function validateReqSignin(body, res) {
-  if (typeof body.password !== 'undefined' && typeof body.email !== 'undefined') {
-    return true;
+function validateSigin(body) {
+  let message = '';
+  if (!body.password) {
+    message = 'password: Path `password` is required. ';
   }
-  const message = 'dados de entrada incorretos';
-  res.status(400).send(message);
-  return false;
-}
-
-function validateReqSignup(body, res) {
-  if (typeof body.name !== 'undefined' && typeof body.password !== 'undefined' && typeof body.email !== 'undefined') {
-    return true;
+  if (body.email === 'undefined') {
+    message += 'email: Path `email` is required.';
   }
-  const message = 'dados de entrada incorretos';
-  res.status(400).send(message);
-  return false;
+  return message;
 }
-
 export const UserController = (UserModel, hash, tokconstrutor) => ({
 
   async create(req, res) {
-    if (validateReqSignup(req.body, res)) {
+    try {
       const user = new UserModel(req.body);
-      try {
-        user.password = hash(user.password);
-        await user.save();
-        res.status(200).send(user);
-      } catch (err) {
-        res.status(400).send(err.message);
-      }
+      user.password = hash(user.password);
+      await user.save();
+      return res.status(200).send(await user);
+    } catch (err) {
+      return res.status(400).send(err.message);
     }
   },
+
   async signin(req, res) {
-    if (validateReqSignin(req.body, res)) {
-      let pass = req.body.password;
-      pass = hash(pass).toString();
-      const exp = (30 * 60000);
-      const expirationDate = calcExpDate(exp);
-      try {
-        const user = await UserModel.findOneAndUpdate({ email: req.body.email, password: pass }, { last_login: Date.now() });
-        const myUser = user.toJSON();
-        myUser.exp = exp;
-        myUser.validDate = expirationDate;
-        const token = tokconstrutor.sign(myUser, 'codigo');
-        res.status(200).send(token);
-      } catch (err) {
-        res.status(400).send(err.message);
-      }
+    const message = validateSigin(req.body);
+    if (message != '') {
+      return res.status(400).send(message);
+    }
+    let pass = req.body.password;
+    pass = hash(pass).toString();
+    const exp = (30 * 60000);
+    const expirationDate = calcExpDate(exp);
+    try {
+      const user = await UserModel
+        .findOneAndUpdate({ email: req.body.email, password: pass }, { last_login: Date.now() });
+      const myUser = user.toJSON();
+      myUser.exp = exp;
+      myUser.validDate = expirationDate;
+      const token = tokconstrutor.sign(myUser, 'codigo');
+      return res.status(200).send(token);
+    } catch (err) {
+      return res.status(400).send(err.message);
     }
   },
 
