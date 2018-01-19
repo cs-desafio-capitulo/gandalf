@@ -74,10 +74,21 @@ describe('userRoutes: Users', () => {
       it('should return a error ', async () => {
         const User = { email: 'Newuser@user.com' };
 
-        const resUser = await request
+        await request
           .post('/signin')
           .send(User)
           .expect(400, 'password: Path `password` is required. ');
+
+      });
+    });
+    context('when posting wrong password', () => {
+      it('should return a error ', async () => {
+        const User = { email: 'Newuser@user.com', password: '1234556' };
+
+        await request
+          .post('/signin')
+          .send(User)
+          .expect(400, 'usuario não enontrado');
 
       });
     });
@@ -92,8 +103,6 @@ describe('userRoutes: Users', () => {
         .send(User);
       expect(resUser.error.text).to.be.equal('password: Path `password` is required. email: Path `email` is required.');
       expect(resUser.statusCode).to.be.equal(400);
-
-
     });
   });
 

@@ -53,6 +53,7 @@ export const UserController = (UserModel, hash, tokconstrutor) => ({
   },
 
   async validate(req, res) {
+    
     try {
       const decoded = jwt.verify(
         req.body.token, 'codigo',
@@ -60,9 +61,10 @@ export const UserController = (UserModel, hash, tokconstrutor) => ({
           algorithms: ['HS256'],
         },
       );
-      res.status(200).send(decoded);
-    } catch (err) {
-      res.status(400).send(err.message);
+     
+      return res.status(200).send(decoded);
+    } catch (err) { 
+      return res.status(400).send(err.message);
     }
   },
 });
