@@ -17,15 +17,15 @@ describe('userRoutes: Users', () => {
   after(() => {
     mongoose.connection.close();
   });
-
+  const agora = new Date;
   const defaultUser = {
     name: 'Default',
     email: 'user1@user.com',
     password: 'pass',
     permission: 'user',
-    criate_date: 1513958972398,
-    update_date: 1513958972398,
-    last_login: 1513958972398,
+    criate_date: agora,
+    update_date: agora,
+    last_login: agora,
   };
 
   const customId = '56cb91bdc3464f14678934ca';
@@ -37,38 +37,33 @@ describe('userRoutes: Users', () => {
     name: 'Default',
     email: 'user1@user.com',
     password: sha256('pass').toString(),
+    last_login: agora.toISOString(),
+    update_date: agora.toISOString(),
+    criate_date: agora.toISOString(),
     permission: 'user',
-    criate_date: '2017-12-22T16:09:32.398Z',
-    update_date: '2017-12-22T16:09:32.398Z',
-    last_login: '2017-12-22T16:09:32.398Z',
   };
-
+  let tkw;
   describe('POST /signup', () => {
-    context('when posting a validuser', () => {
-      it('should return a new  user with status code 200', async () => {
+    context('when posting a valid user', () => {
+      it('should return a new  user with status code 200', async (done) => {
         await request
           .post('/signup')
           .send(newUser)
-          .expect(200, expectedSavedUser);
+          .expect(200, expectedSavedUser, done());
+      });
+    });
+    context('when posting a null user', () => {
+      it('should return a error with status 400', async () => {
+        const User = '';
+        const resUser = await request
+          .post('/signup')
+          .send(User);
+        expect(resUser.error.text).to.be.equal('User validation failed: name: Path `name` is required.');
+        expect(resUser.statusCode).to.be.equal(400);
+
       });
     });
   });
-
-  describe('POST /singin', () => {
-    context('when posting a valid password and email', () => {
-      it('should return a token ', async () => {
-        const User = Object.assign({}, { email: 'user1@user.com', password: 'pass' });
-        await request
-          .post('/signin')
-          .send(User)
-          .expect((res) => {
-            if (res.length > 50) return true;
-          })
-          .expect(200);
-      });
-    });
-  });
-
   describe('POST /singin', () => {
     context('when posting without password', () => {
       it('should return a error ', async () => {
@@ -88,33 +83,60 @@ describe('userRoutes: Users', () => {
         await request
           .post('/signin')
           .send(User)
-          .expect(400, 'usuario não enontrado');
+          .expect(400, 'usuário não encontrado!');
 
+      });
+    });
+
+    context('when posting a null user', () => {
+      it('should return a error with status 400', async () => {
+        const User = '';
+
+        const resUser = await request
+          .post('/signin')
+          .send(User);
+        expect(resUser.error.text).to.be.equal('password: Path `password` is required. email: Path `email` is required.');
+        expect(resUser.statusCode).to.be.equal(400);
+      });
+    });
+
+    describe('valid', () => {
+      context('when posting a valid password and email', () => {
+        it('should return a token ', async () => {
+          const User = Object.assign({}, { email: 'user1@user.com', password: 'pass' });
+          await request
+            .post('/signin')
+            .send(User)
+            .expect((res) => {
+              tkw = res.text;
+              if (res.text.length > 50) return true;
+            })
+            .expect(200);
+        });
       });
     });
   });
 
-  context('signin when posting a null user', () => {
-    it('should return a error with status 400', async () => {
-      const User = '';
+  context('validate token', () => {
+    it('should be return token information valid', async () => {
+      const token = { token: tkw };
+      const valid = await request
+        .post('/validate')
+        .send(token);
+      const resp = JSON.parse(valid.text);
+      expect(resp._id).to.be.equal(customId);
+      expect(resp.name).to.be.equal('Default');
 
-      const resUser = await request
-        .post('/signin')
-        .send(User);
-      expect(resUser.error.text).to.be.equal('password: Path `password` is required. email: Path `email` is required.');
-      expect(resUser.statusCode).to.be.equal(400);
+    });
+    it('should be return false when token has not valid', async () => {
+      const token = '12345789';
+      const valid = await request
+        .post('/validate')
+        .send(token);
+      expect(valid.error.text).to.be.equal('jwt must be provided');
+
     });
   });
 
-  context('signup when posting a null user', () => {
-    it('should return a error with status 400', async () => {
-      const User = '';
-      const resUser = await request
-        .post('/signup')
-        .send(User);
-      expect(resUser.error.text).to.be.equal('User validation failed: name: Path `name` is required.');
-      expect(resUser.statusCode).to.be.equal(400);
 
-    });
-  });
 });

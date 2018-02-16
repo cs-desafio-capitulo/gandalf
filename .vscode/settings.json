@@ -1,3 +1,5 @@
 {
-    "editor.tabSize": 2
+    "editor.tabSize": 2,
+    "git.path": "https://github.com/cs-desafio-capitulo",
+  
 }

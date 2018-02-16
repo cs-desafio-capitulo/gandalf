@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { UserController, calcExpDate } from '../../../src/controllers';
-
+import jwt from 'jsonwebtoken';
 describe('controllers', () => {
   describe('smoke tests', () => {
     describe('factory function', () => {
@@ -56,7 +56,7 @@ describe('controllers', () => {
       }
     }
     const mockSHA = value => `${value}`;
-    const mockJwk = { sign: value => `${value}` };
+    const mockJwk = { sign: value => `${value}`, verify: jwt.verify };
     let resposta = '';
     const mockReq = { body: { name: 'user', email: '123@eu.com', password: 'pass' } };
     const mockRes = {
@@ -84,13 +84,11 @@ describe('controllers', () => {
       });
 
       it('should calculate exp date', () => {
-        console.log(calcExpDate(300).toJSON());
         expect(calcExpDate(300)).to.be.a('Date');
       });
 
       it('should res send token', async () => {
         await userController.signin(mockReq, mockRes);
-        console.log(resposta[0]);
         expect(resposta).to.be.a('string');
       });
 
@@ -171,7 +169,7 @@ describe('controllers', () => {
     });
     describe('singup', () => {
       const userController = UserController(mockUserModel, mockSHA, mockJwk);
-      it('should return 400 when an error occurs ', async () => {
+      it('should call status and send only once ', async () => {
         callCountStatus = 0;
         callCountSend = 0;
         await userController.create(mockReq, mockRes);
@@ -184,7 +182,7 @@ describe('controllers', () => {
       it('should return 400 when token is invalid', async () =>{
         callCountStatus = 0;
         callCountSend = 0;
-       const user =  await userController.validate({body:{token:'token'}}, mockRes);
+        const user =  await userController.validate({body:{token:'token'}}, mockRes);
        console.log(mockRes.status);
        expect(callCountStatus).to.be.equal(1);
       expect(callCountSend).to.be.equal(1);
