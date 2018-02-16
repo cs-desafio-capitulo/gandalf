@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { UserController, calcExpDate } from '../../../src/controllers';
+import jwt from 'jsonwebtoken';
 
 describe('controllers', () => {
   describe('smoke tests', () => {
@@ -32,15 +33,15 @@ describe('controllers', () => {
 
     const fakeDatabase = {
       constructor() {
-       
+
       },
       async findOneAndUpdate(req, res) {
         busca += 1;
         const user = { _id: 'fakeId', last_login: new Date(), token: 'token' };
-        user.toJSON = () => user; 
+        user.toJSON = () => user;
         return user;
       },
-      
+
     };
     class mockUserModel {
       constructor() {
@@ -56,13 +57,15 @@ describe('controllers', () => {
       }
     }
     const mockSHA = value => `${value}`;
-    const mockJwk = { sign: value => `${value}` };
+    const mockJwk = { sign: value => `${value}`, verify: jwt.verify };
+
     let resposta = '';
     const mockReq = { body: { name: 'user', email: '123@eu.com', password: 'pass' } };
     const mockRes = {
       status: code =>
-      // TODO: create new test "should call res.status and res.send"
-      // expect(code).to.be.equal(200);
+        // TODO: create new test "should call res.status and res.send"
+        // expect(code).to.be.equal(200);
+
         ({
 
           send: (value) => {
@@ -83,8 +86,8 @@ describe('controllers', () => {
         expect(busca).to.be.equal(1);
       });
 
-      it('should calculate exp date', ()=>{
-        console.log(calcExpDate(300).toJSON());
+      it('should calculate exp date', () => {
+
         expect(calcExpDate(300)).to.be.a('Date');
       });
 
@@ -93,7 +96,6 @@ describe('controllers', () => {
         console.log(resposta[0]);
         expect(resposta).to.be.a('string');
       });
-      
     });
 
     describe('singup', () => {
@@ -114,23 +116,24 @@ describe('controllers', () => {
       });
     });
 
-    describe('validate',() => {
+    describe('validate', () => {
       const userController = UserController(fakeDatabase, mockSHA, mockJwk);
-      const mockReq1 = {body:{token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1NmNiOTFiZGMzNDY0ZjE0Njc4OTM0Y2EiLCJuYW1lIjoiRGVmYXVsdCIsImVtYWlsIjoidXNlcjFAdXNlci5jb20iLCJwYXNzd29yZCI6ImQ3NGZmMGVlOGRhM2I5ODA2YjE4Yzg3N2RiZjI5YmJkZTUwYjViZDhlNGRhZDdhM2E3MjUwMDBmZWI4MmU4ZjEiLCJjcmlhdGVfZGF0ZSI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsIl9fdiI6MCwibGFzdF9sb2dpbiI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsInVwZGF0ZV9kYXRlIjoiMjAxNy0xMi0yMlQxNjowOTozMi4zOThaIiwicGVybWlzc2lvbiI6InVzZXIiLCJleHAiOjE1MTYwOTkzNDYyNjAsImlhdCI6MTUxNjA5NzU0Nn0.2N0dgWaMd7bEMeh-V_ghWi3RPLP60SRgvHdoqoU8wM8'}};
+      const mockReq1 = { body: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1NmNiOTFiZGMzNDY0ZjE0Njc4OTM0Y2EiLCJuYW1lIjoiRGVmYXVsdCIsImVtYWlsIjoidXNlcjFAdXNlci5jb20iLCJwYXNzd29yZCI6ImQ3NGZmMGVlOGRhM2I5ODA2YjE4Yzg3N2RiZjI5YmJkZTUwYjViZDhlNGRhZDdhM2E3MjUwMDBmZWI4MmU4ZjEiLCJjcmlhdGVfZGF0ZSI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsIl9fdiI6MCwibGFzdF9sb2dpbiI6IjIwMTctMTItMjJUMTY6MDk6MzIuMzk4WiIsInVwZGF0ZV9kYXRlIjoiMjAxNy0xMi0yMlQxNjowOTozMi4zOThaIiwicGVybWlzc2lvbiI6InVzZXIiLCJleHAiOjE1MTYwOTkzNDYyNjAsImlhdCI6MTUxNjA5NzU0Nn0.2N0dgWaMd7bEMeh-V_ghWi3RPLP60SRgvHdoqoU8wM8' } };
+
       it('should return a user Id', async () => {
         await userController.validate(mockReq1, mockRes);
         expect(resposta._id).to.be.equal('56cb91bdc3464f14678934ca');
       });
-     
-      it('should return a date Expiration Token', () =>{
-        
+      it('should return a date Expiration Token', () => {
+
       })
     })
   });
   describe('bad way', () => {
     const fakeDatabase = {
-      async findOne(req, res) {
-        const user = new mockUserModel();
+
+      async findOneAndUpdate(req, res) {
+
         throw new Error('Booom!!');
       },
     };
@@ -141,10 +144,6 @@ describe('controllers', () => {
       async save() {
         throw new Error('Booom!!');
       }
-      async findOne() {
-        throw new Error('Booom!!');
-      }
-      toJSON(value) { return value; }
     }
     const mockSHA = value => `${value}`;
     const mockJwk = { sing: value => `${value}` };
@@ -158,7 +157,7 @@ describe('controllers', () => {
         return {
           send: (value) => {
             callCountSend += 1;
-            //expect(value).to.be.equal('Booom!!');
+
           },
         };
       },
@@ -173,10 +172,11 @@ describe('controllers', () => {
         expect(callCountStatus).to.be.equal(1);
         expect(callCountSend).to.be.equal(1);
       });
+
     });
     describe('singup', () => {
       const userController = UserController(mockUserModel, mockSHA, mockJwk);
-      it('should return 400 when an error occurs ', async () => {
+      it('should call status and send only once ', async () => {
         callCountStatus = 0;
         callCountSend = 0;
         await userController.create(mockReq, mockRes);
@@ -184,5 +184,17 @@ describe('controllers', () => {
         expect(callCountSend).to.be.equal(1);
       });
     });
+    describe('validate', () => {
+      const userController = UserController(fakeDatabase, mockSHA, mockJwk);
+      it('should return 400 when token is invalid', async () =>{
+        callCountStatus = 0;
+        callCountSend = 0;
+        const user =  await userController.validate({body:{token:'token'}}, mockRes);
+       console.log(mockRes.status);
+       expect(callCountStatus).to.be.equal(1);
+      expect(callCountSend).to.be.equal(1);
+      })
+    })
   });
 });
+
