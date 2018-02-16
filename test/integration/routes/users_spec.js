@@ -17,15 +17,19 @@ describe('userRoutes: Users', () => {
   after(() => {
     mongoose.connection.close();
   });
+
   const agora = new Date;
+
   const defaultUser = {
     name: 'Default',
     email: 'user1@user.com',
     password: 'pass',
     permission: 'user',
+
     criate_date: agora,
     update_date: agora,
     last_login: agora,
+
   };
 
   const customId = '56cb91bdc3464f14678934ca';
@@ -37,6 +41,7 @@ describe('userRoutes: Users', () => {
     name: 'Default',
     email: 'user1@user.com',
     password: sha256('pass').toString(),
+
     last_login: agora.toISOString(),
     update_date: agora.toISOString(),
     criate_date: agora.toISOString(),
@@ -64,18 +69,22 @@ describe('userRoutes: Users', () => {
       });
     });
   });
+
   describe('POST /singin', () => {
     context('when posting without password', () => {
       it('should return a error ', async () => {
         const User = { email: 'Newuser@user.com' };
 
+
         await request
+
           .post('/signin')
           .send(User)
           .expect(400, 'password: Path `password` is required. ');
 
       });
     });
+
     context('when posting wrong password', () => {
       it('should return a error ', async () => {
         const User = { email: 'Newuser@user.com', password: '1234556' };
@@ -137,6 +146,5 @@ describe('userRoutes: Users', () => {
 
     });
   });
-
 
 });
