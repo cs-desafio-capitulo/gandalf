@@ -65,7 +65,6 @@ describe('userRoutes: Users', () => {
           .send(User);
         expect(resUser.error.text).to.be.equal('User validation failed: name: Path `name` is required.');
         expect(resUser.statusCode).to.be.equal(400);
-
       });
     });
   });
