@@ -17,6 +17,7 @@ function validateSigin(body) {
   }
   return message;
 }
+
 export const UserController = (UserModel, hash, jsonwt) => ({
 
   async create(req, res) {
@@ -39,15 +40,18 @@ export const UserController = (UserModel, hash, jsonwt) => ({
     let pass = req.body.password;
     pass = hash(pass).toString();
     const exp = (300 * 60000);
+
     const expirationDate = calcExpDate(exp);
     try {
       const user = await UserModel
         .findOneAndUpdate({ email: req.body.email, password: pass }, { last_login: Date.now() });
+
       if (user == null) {
         return res.status(400).send('usuário não encontrado!');
       }
       const myUser = user.toJSON();
       const token = jsonwt.sign(myUser, 'codigo',{ expiresIn:exp});
+
       return res.status(200).send(token);
     } catch (err) {
       return res.status(400).send(err.message);
@@ -56,13 +60,17 @@ export const UserController = (UserModel, hash, jsonwt) => ({
 
   async validate(req, res) {
     try {
-      const decoded = await jwt.verify(
+
+      const decoded = jwt.verify(
+
         req.body.token, 'codigo',
         {
           algorithms: ['HS256'],
         },
       );
-      return res.status(200).send(decoded);
+
+    res.status(200).send(decoded);
+
     } catch (err) {
       return res.status(400).send(err.message);
     }
